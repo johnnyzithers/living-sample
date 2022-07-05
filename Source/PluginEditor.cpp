@@ -14,8 +14,10 @@ LivingSampleAudioProcessorEditor::LivingSampleAudioProcessorEditor (LivingSample
       : AudioProcessorEditor (&p),
         audioProcessor (p),
         valueTreeState(vts),
-        sample1Control(p.sampleProcessor1)
-        
+        sample1Control(p.sampleProcessor1),
+        sample2Control(p.sampleProcessor2),
+        sample3Control(p.sampleProcessor3),
+        sample4Control(p.sampleProcessor4)
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -25,7 +27,10 @@ LivingSampleAudioProcessorEditor::LivingSampleAudioProcessorEditor (LivingSample
 
     
     addAndMakeVisible(&sample1Control);
-    
+    addAndMakeVisible(&sample2Control);
+    addAndMakeVisible(&sample3Control);
+    addAndMakeVisible(&sample4Control);
+
 }
 
 LivingSampleAudioProcessorEditor::~LivingSampleAudioProcessorEditor()
@@ -44,6 +49,15 @@ void LivingSampleAudioProcessorEditor::paint (juce::Graphics& g)
     
     sample1Control.setTopLeftPosition(10, 10);
     sample1Control.setBounds(10, 10, getWidth() - 20, getWidth() - 20);
+    
+    sample2Control.setTopLeftPosition(10, 85);
+    sample2Control.setBounds(10, 85, getWidth() - 20, getWidth() - 20);
+    
+    sample3Control.setTopLeftPosition(10, 160);
+    sample3Control.setBounds(10, 160, getWidth() - 20, getWidth() - 20);
+    
+    sample4Control.setTopLeftPosition(10, 235);
+    sample4Control.setBounds(10, 235, getWidth() - 20, getWidth() - 20);
 }
 
 void LivingSampleAudioProcessorEditor::resized()

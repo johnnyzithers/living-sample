@@ -60,6 +60,9 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 //    FIXME
     SampleFileProcessor sampleProcessor1;
+    SampleFileProcessor sampleProcessor2;
+    SampleFileProcessor sampleProcessor3;
+    SampleFileProcessor sampleProcessor4;
 
 private:
         

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="Mxp79b" name="LivingSample" projectType="audioplug" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
+              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
+              pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn">
   <MAINGROUP id="r39xI3" name="LivingSample">
     <GROUP id="{CAE0E8BB-AE2E-9E38-640B-12DBD2A2952F}" name="Source">
       <FILE id="NsO3kL" name="ProcessorBase.h" compile="0" resource="0" file="Source/ProcessorBase.h"/>

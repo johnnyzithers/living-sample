@@ -11,15 +11,13 @@
 
 //==============================================================================
 LivingSampleAudioProcessor::LivingSampleAudioProcessor()
-#ifndef JucePlugin_PreferredChannelConfigurations
-     : AudioProcessor (BusesProperties()
-                     #if ! JucePlugin_IsMidiEffect
-                      #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
-                      #endif
-                       .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
-                     #endif
-                       ),
+
+            : AudioProcessor (BusesProperties()
+                  .withOutput ("Output #1",  juce::AudioChannelSet::stereo(), true)
+                  .withOutput ("Output #2",  juce::AudioChannelSet::stereo(), false)
+                  .withOutput ("Output #3",  juce::AudioChannelSet::stereo(), false)
+                  .withOutput ("Output #4",  juce::AudioChannelSet::stereo(), false)
+                  .withOutput ("Output #5",  juce::AudioChannelSet::stereo(), false)),
             parameters (*this, nullptr, juce::Identifier ("LivingSampleParams"),
               {
                   std::make_unique<juce::AudioParameterBool> ("play1",
@@ -30,7 +28,7 @@ LivingSampleAudioProcessor::LivingSampleAudioProcessor()
                                                               false)
               })
 
-#endif
+
 {
 
 //    addAndMakeVisible(&sampleFile1);
@@ -108,7 +106,7 @@ void LivingSampleAudioProcessor::changeProgramName (int index, const juce::Strin
 //==============================================================================
 void LivingSampleAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    
+    sampleProcessor1.prepareToPlay(sampleRate, samplesPerBlock);
 
 }
 
@@ -152,6 +150,8 @@ void LivingSampleAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 //
+    
+    sampleProcessor1.processBlock(buffer, midiMessages);
 
     
     

@@ -22,7 +22,7 @@ class SampleFileControl :  public juce::Component,
 public:
     SampleFileControl (SampleFileProcessor& sfProcToUse)
     :
-        sampleProcessor1(sfProcToUse),
+        sampleProcessor(sfProcToUse),
         state (Stopped),
         thumbComponent(512, formatManager, thumbnailCache),
         thumbnailCache (5),
@@ -57,12 +57,6 @@ public:
         formatManager.registerBasicFormats();
 
     }
-//    
-//    void reset() override
-//    {
-////        filter.reset();
-//    }
-    
 
 
     void paint (juce::Graphics& g) override
@@ -158,17 +152,19 @@ private:
 
                 if (duration < 10)
                 {
-                    // for getting bufferr
-                    fileBuffer.setSize ((int) reader->numChannels, (int) reader->lengthInSamples);
-                    reader->read (&fileBuffer, 0, (int) reader->lengthInSamples, 0, true, true);
-                    position = 0;
-//                    setAudioChannels (0, (int) reader->numChannels);
-                    
-                    
+//                    // for getting bufferr
+//                    fileBuffer.setSize ((int) reader->numChannels, (int) reader->lengthInSamples);
+//                    reader->read (&fileBuffer, 0, (int) reader->lengthInSamples, 0, true, true);
+//                    position = 0;
+////                    setAudioChannels (0, (int) reader->numChannels);
+//
+
                     // for thumbnail
                     // FIXME reader2..
                     auto* reader2 = formatManager.createReaderFor (file);
-
+                    
+                    sampleProcessor.loadNewSample(*reader2);
+                    
                     auto newSource = std::make_unique<juce::AudioFormatReaderSource> (reader2, true);
                     transportSource.setSource (newSource.get(), 0, nullptr, reader2->sampleRate);
                     triggerButton.setEnabled (true);
@@ -196,7 +192,7 @@ private:
     float currentLevel = 0.0f, previousLevel = 0.0f;
 
     
-    SampleFileProcessor& sampleProcessor1;
+    SampleFileProcessor& sampleProcessor;
     
     TransportState state;
     juce::AudioTransportSource transportSource;

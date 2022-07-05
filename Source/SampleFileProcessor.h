@@ -19,72 +19,88 @@ class SampleFileProcessor : public ProcessorBase
 
 {
 public:
+    enum
+    {
+        maxMidiChannel = 16,
+        maxNumberOfVoices = 5
+    };
+
     SampleFileProcessor ()
     {
         
         formatManager.registerBasicFormats();
-
+        
+        // one midi channel, one output
+        for (auto i = 0; i < 5; ++i)                // [1]
+            synth.addVoice (new juce::SamplerVoice());
+//        loadNewSample();
+        
     }
     
     
     void prepareToPlay (double sampleRate, int samplesPerBlock) override
     {
-
-
-
+        juce::ignoreUnused (samplesPerBlock);
+        synth.setCurrentPlaybackSampleRate (sampleRate);
     }
 
-    void processBlock (juce::AudioSampleBuffer& buffer, juce::MidiBuffer&) override
+    void processBlock (juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) override
     {
-        auto level = currentLevel;
-        auto startLevel = level == previousLevel ? level : previousLevel;
-
-        auto numInputChannels = fileBuffer.getNumChannels();
-        auto numOutputChannels = buffer.getNumChannels();
-
-        auto outputSamplesRemaining = buffer.getNumSamples();
-        auto outputSamplesOffset = 0;
-
-        while (outputSamplesRemaining > 0)
+        if(fileLoaded)
         {
-            auto bufferSamplesRemaining = fileBuffer.getNumSamples() - position;
-            auto samplesThisTime = juce::jmin (outputSamplesRemaining, bufferSamplesRemaining);
-
-            for (auto channel = 0; channel < numOutputChannels; ++channel)
-            {
-                buffer.copyFrom (channel,
-                                   outputSamplesOffset,
-                                   fileBuffer,
-                                   channel % numInputChannels,
-                                   position,
-                                   samplesThisTime);
-
-                buffer.applyGainRamp (channel, outputSamplesOffset, samplesThisTime, startLevel, level);
-            }
-
-            outputSamplesRemaining -= samplesThisTime;
-            outputSamplesOffset += samplesThisTime;
-            position += samplesThisTime;
-
-            if (position == fileBuffer.getNumSamples())
-                position = 0;
+//            auto busCount = getBusCount (false);                // [11]
+     
+//            for (auto busNr = 0; busNr < busCount; ++busNr)     // [12]
+//            {
+//                auto midiChannelBuffer = filterMidiMessagesForChannel (midiBuffer, busNr + 1);
+//                auto audioBusBuffer = getBusBuffer (buffer, false, 0);
+     
+                synth.renderNextBlock (buffer, midiBuffer, 0, buffer.getNumSamples()); // [13]
+//            }
         }
-        
-        previousLevel = level;
-        
     }
 
     void reset() override
     {
-//        filter.reset();
+
     }
     
+    void loadNewSample(juce::AudioFormatReader& reader)
+    {
+        fileLoaded = true;
+        
+        juce::BigInteger midiNotes;
+        midiNotes.setRange (0, 126, true);
+        juce::SynthesiserSound::Ptr newSound = new juce::SamplerSound("Voice", reader, midiNotes, 0x40, 0.0, 0.0, 10.0);
+        sound = newSound;
+        synth.removeSound(0);
+        synth.addSound(sound);
+        
+    }
+    
+    bool canAddBus    (bool isInput) const override   { return (! isInput && getBusCount (false) < maxMidiChannel); }
+    bool canRemoveBus (bool isInput) const override   { return (! isInput && getBusCount (false) > 1); }
+
 
 private:
 
+    static juce::MidiBuffer filterMidiMessagesForChannel (const juce::MidiBuffer& input, int channel)
+    {
+        juce::MidiBuffer output;
 
+        for (auto metadata : input)     // [14]
+        {
+            auto message = metadata.getMessage();
+
+            if (message.getChannel() == channel)
+                output.addEvent (message, metadata.samplePosition);
+        }
+
+        return output;                  // [15]
+    }
+    
     float currentLevel = 0.0f, previousLevel = 0.0f;
-
+ 
     
 //    TransportState state;
     juce::AudioTransportSource transportSource;
@@ -93,9 +109,11 @@ private:
     juce::AudioFormatManager formatManager;
     juce::AudioSampleBuffer fileBuffer;
 
+    juce::Synthesiser synth;
+    juce::SynthesiserSound::Ptr sound;
 
     int position = 0;
-
+    bool fileLoaded = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SampleFileProcessor)
 };

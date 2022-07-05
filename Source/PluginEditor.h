@@ -38,6 +38,9 @@ private:
     LivingSampleAudioProcessor& audioProcessor;
     
     SampleFileControl sample1Control;
+    SampleFileControl sample2Control;
+    SampleFileControl sample3Control;
+    SampleFileControl sample4Control;
 
     juce::AudioProcessorValueTreeState& valueTreeState;
 
