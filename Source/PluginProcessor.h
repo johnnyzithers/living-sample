@@ -63,10 +63,16 @@ public:
     SampleFileProcessor sampleProcessor2;
     SampleFileProcessor sampleProcessor3;
     SampleFileProcessor sampleProcessor4;
-
+    
+    juce::MidiKeyboardState keyboardState;
+    
 private:
-        
+    static juce::MidiBuffer filterMidiMessagesForChannel (const juce::MidiBuffer& input, int channel);
+    
     juce::AudioProcessorValueTreeState parameters;
+
+    // FIXME
+    juce::MidiBuffer temp;
 
 
     

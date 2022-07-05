@@ -152,17 +152,12 @@ private:
 
                 if (duration < 10)
                 {
-//                    // for getting bufferr
-//                    fileBuffer.setSize ((int) reader->numChannels, (int) reader->lengthInSamples);
-//                    reader->read (&fileBuffer, 0, (int) reader->lengthInSamples, 0, true, true);
-//                    position = 0;
-////                    setAudioChannels (0, (int) reader->numChannels);
-//
 
                     // for thumbnail
                     // FIXME reader2..
                     auto* reader2 = formatManager.createReaderFor (file);
                     
+                    // load this audio file into the processor
                     sampleProcessor.loadNewSample(*reader2);
                     
                     auto newSource = std::make_unique<juce::AudioFormatReaderSource> (reader2, true);

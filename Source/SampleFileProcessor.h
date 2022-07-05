@@ -10,12 +10,13 @@
 
 
 #pragma once
-#include "ProcessorBase.h"
+//#include "ProcessorBase.h"
 
 
 // example implementation of the Exercise 3
 //==============================================================================
-class SampleFileProcessor : public ProcessorBase
+class SampleFileProcessor : public juce::AudioSource
+//public ProcessorBase
 
 {
 public:
@@ -25,92 +26,86 @@ public:
         maxNumberOfVoices = 5
     };
 
-    SampleFileProcessor ()
+    SampleFileProcessor (juce::MidiKeyboardState& keyState, juce::MidiBuffer& buf)
+        : keyboardState (keyState),
+        incomingMidi(buf)
     {
         
         formatManager.registerBasicFormats();
-        
+
         // one midi channel, one output
-        for (auto i = 0; i < 5; ++i)                // [1]
+        for (auto i = 0; i < maxNumberOfVoices; ++i)                // [1]
             synth.addVoice (new juce::SamplerVoice());
-//        loadNewSample();
         
     }
     
     
-    void prepareToPlay (double sampleRate, int samplesPerBlock) override
+//    void prepareToPlay (double sampleRate, int samplesPerBlock) override
+//    {
+//        juce::ignoreUnused (samplesPerBlock);
+//        synth.setCurrentPlaybackSampleRate (sampleRate);
+//    }
+    
+    void prepareToPlay (int /*samplesPerBlockExpected*/, double sampleRate) override
     {
-        juce::ignoreUnused (samplesPerBlock);
         synth.setCurrentPlaybackSampleRate (sampleRate);
+        midiCollector.reset(sampleRate);
     }
 
-    void processBlock (juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) override
+    void getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill) override
     {
-        if(fileLoaded)
-        {
-//            auto busCount = getBusCount (false);                // [11]
-     
-//            for (auto busNr = 0; busNr < busCount; ++busNr)     // [12]
-//            {
-//                auto midiChannelBuffer = filterMidiMessagesForChannel (midiBuffer, busNr + 1);
-//                auto audioBusBuffer = getBusBuffer (buffer, false, 0);
-     
-                synth.renderNextBlock (buffer, midiBuffer, 0, buffer.getNumSamples()); // [13]
-//            }
-        }
-    }
+        bufferToFill.clearActiveBufferRegion();
 
-    void reset() override
+
+        keyboardState.processNextMidiBuffer (incomingMidi, bufferToFill.startSample,
+                                             bufferToFill.numSamples, true);
+
+        synth.renderNextBlock (*bufferToFill.buffer, incomingMidi,
+                               bufferToFill.startSample, bufferToFill.numSamples);
+    }
+    
+    void setIncomingMidi(juce::MidiBuffer& newMidi)
     {
-
+        incomingMidi = newMidi;
     }
+
+    juce::MidiMessageCollector* getMidiCollector()
+    {
+        return &midiCollector;
+    }
+    
+    void releaseResources() override {}
     
     void loadNewSample(juce::AudioFormatReader& reader)
     {
-        fileLoaded = true;
-        
         juce::BigInteger midiNotes;
         midiNotes.setRange (0, 126, true);
-        juce::SynthesiserSound::Ptr newSound = new juce::SamplerSound("Voice", reader, midiNotes, 0x40, 0.0, 0.0, 10.0);
+        juce::SynthesiserSound::Ptr newSound = new juce::SamplerSound("Voice", reader, midiNotes, 0x40, 0.0, 0.0, 20.0);
         sound = newSound;
         synth.removeSound(0);
         synth.addSound(sound);
+        // set fileLoaded flag
+        fileLoaded = true;
         
     }
-    
-    bool canAddBus    (bool isInput) const override   { return (! isInput && getBusCount (false) < maxMidiChannel); }
-    bool canRemoveBus (bool isInput) const override   { return (! isInput && getBusCount (false) > 1); }
-
 
 private:
-
-    static juce::MidiBuffer filterMidiMessagesForChannel (const juce::MidiBuffer& input, int channel)
-    {
-        juce::MidiBuffer output;
-
-        for (auto metadata : input)     // [14]
-        {
-            auto message = metadata.getMessage();
-
-            if (message.getChannel() == channel)
-                output.addEvent (message, metadata.samplePosition);
-        }
-
-        return output;                  // [15]
-    }
     
     float currentLevel = 0.0f, previousLevel = 0.0f;
- 
     
-//    TransportState state;
+    juce::MidiBuffer& incomingMidi;
+    
+
     juce::AudioTransportSource transportSource;
     std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
 
     juce::AudioFormatManager formatManager;
-    juce::AudioSampleBuffer fileBuffer;
+
 
     juce::Synthesiser synth;
     juce::SynthesiserSound::Ptr sound;
+    juce::MidiMessageCollector midiCollector;
+    juce::MidiKeyboardState& keyboardState;
 
     int position = 0;
     bool fileLoaded = false;

@@ -26,9 +26,11 @@ LivingSampleAudioProcessor::LivingSampleAudioProcessor()
                   std::make_unique<juce::AudioParameterBool> ("stop1",
                                                               "Stop Button 1",
                                                               false)
-              })
-
-
+              }),
+            sampleProcessor1(keyboardState, temp),
+            sampleProcessor2(keyboardState, temp),
+            sampleProcessor3(keyboardState, temp),
+            sampleProcessor4(keyboardState, temp)
 {
 
 //    addAndMakeVisible(&sampleFile1);
@@ -147,14 +149,34 @@ bool LivingSampleAudioProcessor::isBusesLayoutSupported (const BusesLayout& layo
 void LivingSampleAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
 //    juce::ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels  = getTotalNumInputChannels();
-    auto totalNumOutputChannels = getTotalNumOutputChannels();
+//    auto totalNumInputChannels  = getTotalNumInputChannels();
+//    auto totalNumOutputChannels = getTotalNumOutputChannels();
+
 //
     
-    sampleProcessor1.processBlock(buffer, midiMessages);
+    auto midiChannelBuffer = filterMidiMessagesForChannel (midiMessages, 1);
+    sampleProcessor1.setIncomingMidi(midiChannelBuffer);
+    
+    juce::AudioSourceChannelInfo info (&buffer, 0, buffer.getNumSamples());
+    sampleProcessor1.getNextAudioBlock(info);
 
     
     
+}
+
+    juce::MidiBuffer LivingSampleAudioProcessor::filterMidiMessagesForChannel (const juce::MidiBuffer& input, int channel)
+    {
+    juce::MidiBuffer output;
+
+    for (auto metadata : input)     // [14]
+    {
+        auto message = metadata.getMessage();
+
+        if (message.getChannel() == channel)
+            output.addEvent (message, metadata.samplePosition);
+    }
+
+    return output;                  // [15]
 }
 
 //==============================================================================
