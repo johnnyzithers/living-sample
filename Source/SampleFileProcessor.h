@@ -54,7 +54,7 @@ public:
 
     void getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill) override
     {
-        bufferToFill.clearActiveBufferRegion();
+//        bufferToFill.clearActiveBufferRegion();
 
 
         keyboardState.processNextMidiBuffer (incomingMidi, bufferToFill.startSample,
@@ -80,7 +80,7 @@ public:
     {
         juce::BigInteger midiNotes;
         midiNotes.setRange (0, 126, true);
-        juce::SynthesiserSound::Ptr newSound = new juce::SamplerSound("Voice", reader, midiNotes, 0x40, 0.0, 0.0, 20.0);
+        juce::SynthesiserSound::Ptr newSound = new juce::SamplerSound("Voice", reader, midiNotes, 60, 0.0, 0.0, 10.0);
         sound = newSound;
         synth.removeSound(0);
         synth.addSound(sound);

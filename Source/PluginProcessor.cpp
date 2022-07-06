@@ -109,7 +109,9 @@ void LivingSampleAudioProcessor::changeProgramName (int index, const juce::Strin
 void LivingSampleAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     sampleProcessor1.prepareToPlay(sampleRate, samplesPerBlock);
-
+    sampleProcessor2.prepareToPlay(sampleRate, samplesPerBlock);
+    sampleProcessor3.prepareToPlay(sampleRate, samplesPerBlock);
+    sampleProcessor4.prepareToPlay(sampleRate, samplesPerBlock);
 }
 
 void LivingSampleAudioProcessor::releaseResources()
@@ -149,16 +151,33 @@ bool LivingSampleAudioProcessor::isBusesLayoutSupported (const BusesLayout& layo
 void LivingSampleAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
 //    juce::ScopedNoDenormals noDenormals;
-//    auto totalNumInputChannels  = getTotalNumInputChannels();
-//    auto totalNumOutputChannels = getTotalNumOutputChannels();
+    auto totalNumInputChannels  = getTotalNumInputChannels();
+    auto totalNumOutputChannels = getTotalNumOutputChannels();
+    
+    
+    for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
+        buffer.clear (i, 0, buffer.getNumSamples());
 
 //
     
+    // fix me dont allocate here
     auto midiChannelBuffer = filterMidiMessagesForChannel (midiMessages, 1);
     sampleProcessor1.setIncomingMidi(midiChannelBuffer);
     
+    auto midiChannelBuffer2 = filterMidiMessagesForChannel (midiMessages, 2);
+    sampleProcessor2.setIncomingMidi(midiChannelBuffer);
+
+//    midiChannelBuffer = filterMidiMessagesForChannel (midiMessages, 3);
+//    sampleProcessor3.setIncomingMidi(midiChannelBuffer);
+//
+//    midiChannelBuffer = filterMidiMessagesForChannel (midiMessages, 4);
+//    sampleProcessor4.setIncomingMidi(midiChannelBuffer);
+
     juce::AudioSourceChannelInfo info (&buffer, 0, buffer.getNumSamples());
     sampleProcessor1.getNextAudioBlock(info);
+
+//    juce::AudioSourceChannelInfo info (&buffer, 0, buffer.getNumSamples());
+//    sampleProcessor2.getNextAudioBlock(info);
 
     
     
