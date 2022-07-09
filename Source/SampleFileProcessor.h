@@ -80,7 +80,8 @@ public:
     {
         juce::BigInteger midiNotes;
         midiNotes.setRange (0, 126, true);
-        juce::SynthesiserSound::Ptr newSound = new juce::SamplerSound("Voice", reader, midiNotes, 60, 0.0, 0.0, 10.0);
+        // FIXME why 100?
+        juce::SynthesiserSound::Ptr newSound = new juce::SamplerSound("Voice", reader, midiNotes, 100, 0.0, 0.0, 10.0);
         sound = newSound;
         synth.removeSound(0);
         synth.addSound(sound);
