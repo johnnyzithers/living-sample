@@ -12,6 +12,8 @@
 #pragma once
 //#include "ProcessorBase.h"
 
+#include "LivingSamplerVoice.h"
+
 
 // example implementation of the Exercise 3
 //==============================================================================
@@ -38,13 +40,6 @@ public:
             synth.addVoice (new juce::SamplerVoice());
         
     }
-    
-    
-//    void prepareToPlay (double sampleRate, int samplesPerBlock) override
-//    {
-//        juce::ignoreUnused (samplesPerBlock);
-//        synth.setCurrentPlaybackSampleRate (sampleRate);
-//    }
     
     void prepareToPlay (int /*samplesPerBlockExpected*/, double sampleRate) override
     {
@@ -81,13 +76,20 @@ public:
         juce::BigInteger midiNotes;
         midiNotes.setRange (0, 126, true);
         // FIXME why 100?
-        juce::SynthesiserSound::Ptr newSound = new juce::SamplerSound("Voice", reader, midiNotes, 100, 0.0, 0.0, 10.0);
+        //juce::SynthesiserSound::Ptr
+        LivingSamplerSound* newSound = new LivingSamplerSound("Voice", reader, midiNotes, 100, 0.0, 0.0, 10.0);
         sound = newSound;
+        duration = newSound->returnLength();
         synth.removeSound(0);
         synth.addSound(sound);
         // set fileLoaded flag
         fileLoaded = true;
         
+    }
+    // FIXME delete
+    float getDuration()
+    {
+        return duration;
     }
 
 private:
@@ -95,13 +97,8 @@ private:
     float currentLevel = 0.0f, previousLevel = 0.0f;
     
     juce::MidiBuffer& incomingMidi;
-    
-
-    juce::AudioTransportSource transportSource;
-    std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
 
     juce::AudioFormatManager formatManager;
-
 
     juce::Synthesiser synth;
     juce::SynthesiserSound::Ptr sound;
@@ -110,6 +107,7 @@ private:
 
     int position = 0;
     bool fileLoaded = false;
+    float duration = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SampleFileProcessor)
 };

@@ -66,7 +66,8 @@ public:
 
         juce::Rectangle<int> thumbnailBounds (padding, padding, getWidth() - (2*padding), (getHeight() - 120)/5);
         thumbComponent.setBounds (thumbnailBounds);
-        //        auto area = getLocalBounds();
+        positionOverlay.setBounds (thumbnailBounds);
+        
         openButton.setTopLeftPosition(padding, 0);
         openButton.setSize(100, padding);
         
@@ -75,6 +76,19 @@ public:
         
         levelSlider.setTopLeftPosition(200+padding,0);
         levelSlider.setSize(getWidth() - 200 - 1.5*padding, padding);
+        
+        
+        auto duration = (float) transportSource.getLengthInSeconds();
+
+        if (duration > 0.0)
+        {
+            auto audioPosition = (float) sampleProcessor.getDuration();
+            auto drawPosition = (audioPosition / duration) * (float) getWidth();
+
+            g.setColour (juce::Colours::green);
+            g.drawLine (drawPosition, 0.0f, drawPosition, (float) getHeight(), 2.0f);
+        }
+        
 
 
     }
