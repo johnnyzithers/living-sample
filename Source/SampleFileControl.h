@@ -24,9 +24,9 @@ public:
     :
         sampleProcessor(sfProcToUse),
         state (Stopped),
-        thumbComponent(512, formatManager, thumbnailCache),
+        thumbComponent (512, formatManager, thumbnailCache),
         thumbnailCache (5),
-        positionOverlay (transportSource)
+        positionOverlay (sampleProcessor, transportSource)
             
         
     {
@@ -77,19 +77,6 @@ public:
         levelSlider.setTopLeftPosition(200+padding,0);
         levelSlider.setSize(getWidth() - 200 - 1.5*padding, padding);
         
-        
-        auto duration = (float) transportSource.getLengthInSeconds();
-
-        if (duration > 0.0)
-        {
-            auto audioPosition = (float) sampleProcessor.getDuration();
-            auto drawPosition = (audioPosition / duration) * (float) getWidth();
-
-            g.setColour (juce::Colours::green);
-            g.drawLine (drawPosition, 0.0f, drawPosition, (float) getHeight(), 2.0f);
-        }
-        
-
 
     }
 

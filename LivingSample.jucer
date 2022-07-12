@@ -16,6 +16,10 @@
             file="Source/SampleFileControl.h"/>
       <FILE id="JN3pWj" name="ThumbnailComponent.h" compile="0" resource="0"
             file="Source/ThumbnailComponent.h"/>
+      <FILE id="ECMmrU" name="LivingSamplerVoice.cpp" compile="1" resource="0"
+            file="Source/LivingSamplerVoice.cpp"/>
+      <FILE id="yAd0Qw" name="LivingSamplerVoice.h" compile="0" resource="0"
+            file="Source/LivingSamplerVoice.h"/>
       <FILE id="fHRNY7" name="SampleFileProcessor.h" compile="0" resource="0"
             file="Source/SampleFileProcessor.h"/>
       <FILE id="AW0qzs" name="PositionOverlay.h" compile="0" resource="0"

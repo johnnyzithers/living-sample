@@ -9,20 +9,24 @@
 */
 
 #pragma once
-
+#include "SampleFileProcessor.h"
 
 class PositionOverlay : public juce::Component,
                               private juce::Timer
 {
 public:
-    PositionOverlay (juce::AudioTransportSource& transportSourceToUse)
-       : transportSource (transportSourceToUse)
+    PositionOverlay (SampleFileProcessor& sampleProcessorToUse, juce::AudioTransportSource& transportSourceToUse)
+    :    transportSource (transportSourceToUse),
+        sampleProcessor (sampleProcessorToUse)
+
     {
         startTimer (40);
     }
 
     void paint (juce::Graphics& g) override
     {
+        
+        
         auto duration = (float) transportSource.getLengthInSeconds();
 
         if (duration > 0.0)
@@ -33,6 +37,8 @@ public:
             g.setColour (juce::Colours::green);
             g.drawLine (drawPosition, 0.0f, drawPosition, (float) getHeight(), 2.0f);
         }
+        
+        
     }
 
     void mouseDown (const juce::MouseEvent& event) override
@@ -55,6 +61,7 @@ private:
     }
 
     juce::AudioTransportSource& transportSource;
+    SampleFileProcessor& sampleProcessor;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PositionOverlay)
 };

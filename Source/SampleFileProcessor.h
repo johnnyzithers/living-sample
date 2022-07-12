@@ -29,8 +29,8 @@ public:
     };
 
     SampleFileProcessor (juce::MidiKeyboardState& keyState, juce::MidiBuffer& buf)
-        : keyboardState (keyState),
-        incomingMidi(buf)
+    :       keyboardState (keyState),
+            incomingMidi(buf)
     {
         
         formatManager.registerBasicFormats();
@@ -49,7 +49,7 @@ public:
 
     void getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill) override
     {
-//        bufferToFill.clearActiveBufferRegion();
+        bufferToFill.clearActiveBufferRegion();
 
 
         keyboardState.processNextMidiBuffer (incomingMidi, bufferToFill.startSample,
@@ -57,6 +57,9 @@ public:
 
         synth.renderNextBlock (*bufferToFill.buffer, incomingMidi,
                                bufferToFill.startSample, bufferToFill.numSamples);
+
+
+        currentPosition += bufferToFill.numSamples;
     }
     
     void setIncomingMidi(juce::MidiBuffer& newMidi)
@@ -73,23 +76,30 @@ public:
     
     void loadNewSample(juce::AudioFormatReader& reader)
     {
+        currentPosition = 0;
         juce::BigInteger midiNotes;
         midiNotes.setRange (0, 126, true);
         // FIXME why 100?
-        //juce::SynthesiserSound::Ptr
-        LivingSamplerSound* newSound = new LivingSamplerSound("Voice", reader, midiNotes, 100, 0.0, 0.0, 10.0);
+        juce::SynthesiserSound::Ptr newSound = new juce::SamplerSound("Voice", reader, midiNotes, 100, 0.0, 0.0, 10.0);
+//        juce::SynthesiserSound::Ptr  newSound = new LivingSamplerSound("Voice", reader, midiNotes, 100, 0.0, 0.0, 10.0);
         sound = newSound;
-        duration = newSound->returnLength();
+//        duration = newSound->returnLength();
+//        duration = newSound.sourceSamplePosition;
         synth.removeSound(0);
         synth.addSound(sound);
         // set fileLoaded flag
         fileLoaded = true;
         
     }
-    // FIXME delete
-    float getDuration()
+
+    int getDuration()
     {
         return duration;
+    }
+    
+    int getCurrentPosition()
+    {
+        return currentPosition;
     }
 
 private:
@@ -97,7 +107,7 @@ private:
     float currentLevel = 0.0f, previousLevel = 0.0f;
     
     juce::MidiBuffer& incomingMidi;
-
+    juce::AudioTransportSource transportSource;
     juce::AudioFormatManager formatManager;
 
     juce::Synthesiser synth;
@@ -107,7 +117,8 @@ private:
 
     int position = 0;
     bool fileLoaded = false;
-    float duration = 0;
+    int duration = 0;
+    int currentPosition;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SampleFileProcessor)
 };
